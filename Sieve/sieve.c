@@ -104,7 +104,10 @@ void *filter(void *vargs)
     pthread_attr_t attrs;
     pthread_attr_init(&attrs);
     pthread_attr_setscope(&attrs, PTHREAD_SCOPE_SYSTEM);
-    pthread_create(&id, &attrs, filter, output_args);
+    if (pthread_create(&id, &attrs, filter, output_args)) {
+        printf("Error: Thread creation failed.");
+        exit(1);
+    }
 
     while (1) {
         int new_num = queue_remove(args);
@@ -149,7 +152,10 @@ int main(int argc, char const *argv[])
     pthread_attr_t attrs;
     pthread_attr_init(&attrs);
     pthread_attr_setscope(&attrs, PTHREAD_SCOPE_SYSTEM);
-    pthread_create(&id, &attrs, filter, args);
+    if (pthread_create(&id, &attrs, filter, args)) {
+        printf("Error: Thread creation failed.");
+        exit(1);
+    }
 
     /* produce the unbounded sequence of natural numbers until the program halts 
      * */
