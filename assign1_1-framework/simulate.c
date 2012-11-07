@@ -120,7 +120,10 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
              * TODO: handle the intervals more neatly. */
             args->i_max = (args->i_max > i_max ? i_max : args->i_max);
 
-            pthread_create(&thread_pool[i], &attrs, &simulate_slice, args);
+            if(pthread_create(&thread_pool[i], &attrs, &simulate_slice, args)) {
+                printf("Error: Thread creation failed.");
+                exit(1);
+            }
         }
 
         /*
