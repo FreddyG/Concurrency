@@ -18,12 +18,6 @@ xlabel('number of threads')
 ylabel('time (seconds)')
 #label('i_max = 10000')
 
-value = data[:, i_max] == 100000;
-plot( data[value, num_threads], data[value, time])
-xlabel('number of threads')
-ylabel('time (seconds)')
-#label('i_max = 100000')
-
 value = data[:, i_max] == 1000000;
 plot( data[value, num_threads], data[value, time])
 xlabel('number of threads')
