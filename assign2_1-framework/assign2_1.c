@@ -53,6 +53,18 @@ int main(int argc, char *argv[])
     int t_max, i_max;
     double time;
 
+    /* MPI initialisation */
+    int rc;
+    rc = MPI_Init(&argc, &argv);
+    if (rc != MPI_SUCCESS){
+        printf("Adios, bitches\n");
+        MPI_Abort(MPI_COMM_WORLD, rc);
+    }
+
+    int my_num, totalnum;
+    MPI_Comm_size(MPI_COMM_WORLD, &totalnum);
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_num);
+
     /* Parse commandline args */
     if (argc < 3) {
         printf("Usage: %s i_max t_max num_threads [initial_data]\n", argv[0]);
@@ -75,91 +87,78 @@ int main(int argc, char *argv[])
     i_max = atoi(argv[1]);
     t_max = atoi(argv[2]);
 
-    if (i_max < 3) {
-        printf("argument error: i_max should be >2.\n");
-        return EXIT_FAILURE;
-    }
-    if (t_max < 1) {
-        printf("argument error: t_max should be >=1.\n");
-        return EXIT_FAILURE;
-    }
+    // process 0 handles the setup
+    if (my_num == 0) {
 
-    /* Allocate and initialize buffers. */
-    old = malloc(i_max * sizeof(double));
-    current = malloc(i_max * sizeof(double));
-    next = malloc(i_max * sizeof(double));
-
-    if (old == NULL || current == NULL || next == NULL) {
-        fprintf(stderr, "Could not allocate enough memory, aborting.\n");
-        return EXIT_FAILURE;
-    }
-
-    memset(old, 0, i_max * sizeof(double));
-    memset(current, 0, i_max * sizeof(double));
-    memset(next, 0, i_max * sizeof(double));
-
-    /* How should we will our first two generations? This is determined by the
-     * optional further commandline arguments.
-     * */
-    if (argc > 3) {
-        if (strcmp(argv[3], "sin") == 0) {
-            fill(old, 1, i_max/4, 0, 2*3.14, sin);
-            fill(current, 2, i_max/4, 0, 2*3.14, sin);
-        } else if (strcmp(argv[3], "sinfull") == 0) {
-            fill(old, 1, i_max-2, 0, 10*3.14, sin);
-            fill(current, 2, i_max-3, 0, 10*3.14, sin);
-        } else if (strcmp(argv[3], "gauss") == 0) {
-            fill(old, 1, i_max/4, -3, 3, gauss);
-            fill(current, 2, i_max/4, -3, 3, gauss);
-        } else if (strcmp(argv[3], "file") == 0) {
-            if (argc < 6) {
-                printf("No files specified!\n");
-                return EXIT_FAILURE;
-            }
-            file_read_double_array(argv[4], old, i_max);
-            file_read_double_array(argv[5], current, i_max);
-        } else {
-            printf("Unknown initial mode: %s.\n", argv[3]);
+        if (i_max < 3) {
+            printf("argument error: i_max should be >2.\n");
             return EXIT_FAILURE;
         }
-    } else {
-        /* Default to sinus. */
-        fill(old, 1, i_max/4, 0, 2*3.14, sin);
-        fill(current, 2, i_max/4, 0, 2*3.14, sin);
-    }
-
-    timer_start();
-
-    /* MPI initialisation */
-    int rc;
-    rc = MPI_Init(&argc, &argv);
-    if (rc != MPI_SUCCESS){
-        printf("Adios, bitches\n");
-        MPI_Abort(MPI_COMM_WORLD, rc);
-    }
-
-    int my_num, totalnum;
-    MPI_Comm_size(MPI_COMM_WORLD, &totalnum);
-    MPI_Comm_rank(MPI_COMM_WORLD, &my_num);
-
-    if (my_num == 0) {
-        for (int i = 0; i < totalnum; ++i) {
-            
+        if (t_max < 1) {
+            printf("argument error: t_max should be >=1.\n");
+            return EXIT_FAILURE;
         }
 
-        double one[1],
-               two[1];
+        /* Allocate and initialize buffers. */
+        old = malloc(i_max * sizeof(double));
+        current = malloc(i_max * sizeof(double));
+        next = malloc(i_max * sizeof(double));
 
-        one[0] = 1;
-        two[0] = 2;
+        if (old == NULL || current == NULL || next == NULL) {
+            fprintf(stderr, "Could not allocate enough memory, aborting.\n");
+            return EXIT_FAILURE;
+        }
 
-        MPI_Send(one, 1, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
-        MPI_Send(two, 1, MPI_DOUBLE, 2, 0, MPI_COMM_WORLD);
+        memset(old, 0, i_max * sizeof(double));
+        memset(current, 0, i_max * sizeof(double));
+        memset(next, 0, i_max * sizeof(double));
+
+        /* How should we will our first two generations? This is determined by the
+         * optional further commandline arguments.
+         * */
+        if (argc > 3) {
+            if (strcmp(argv[3], "sin") == 0) {
+                fill(old, 1, i_max/4, 0, 2*3.14, sin);
+                fill(current, 2, i_max/4, 0, 2*3.14, sin);
+            } else if (strcmp(argv[3], "sinfull") == 0) {
+                fill(old, 1, i_max-2, 0, 10*3.14, sin);
+                fill(current, 2, i_max-3, 0, 10*3.14, sin);
+            } else if (strcmp(argv[3], "gauss") == 0) {
+                fill(old, 1, i_max/4, -3, 3, gauss);
+                fill(current, 2, i_max/4, -3, 3, gauss);
+            } else if (strcmp(argv[3], "file") == 0) {
+                if (argc < 6) {
+                    printf("No files specified!\n");
+                    return EXIT_FAILURE;
+                }
+                file_read_double_array(argv[4], old, i_max);
+                file_read_double_array(argv[5], current, i_max);
+            } else {
+                printf("Unknown initial mode: %s.\n", argv[3]);
+                return EXIT_FAILURE;
+            }
+        } else {
+            /* Default to sinus. */
+            fill(old, 1, i_max/4, 0, 2*3.14, sin);
+            fill(current, 2, i_max/4, 0, 2*3.14, sin);
+        }
+
+        timer_start();
+        
+        // calculate the size of the arrays for each process
+        int stepsize = ((i_max - 2) / totalnum) + 1;
+
+        for (int i = 1; i < totalnum; ++i) {
+            int i_min = 1 + i * stepsize;
+            int i_max = args->i_min + stepsize;
+
+        }
     }
 
+    // every other process goes into the simulation
     else {
         /* Call the actual simulation that should be implemented in simulate.c. */
-        ret = simulate(i_max, t_max, old, current, next);
+        ret = simulate(i_max, t_max);
     }
 
     MPI_Finalize();
