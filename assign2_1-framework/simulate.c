@@ -10,6 +10,8 @@
 
 #include "simulate.h"
 
+#define SIM_TAG 0
+
 
 /* Add any global variables you may need. */
 
@@ -34,10 +36,20 @@ double *simulate(const int i_max, const int t_max)
     MPI_Comm_rank(MPI_COMM_WORLD, &my_num);
 
     MPI_Status s;
-    MPI_Recv(old_array, array_size, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &s);
+    int size;
 
-    printf("Process %d received '%f'\n", my_num, old_array[0]);
+    // first receive the array size
+    MPI_Recv(&size, 1, MPI_INT, 0, SIM_TAG, MPI_COMM_WORLD, &s);
+
+    double old[size],
+           current[size];
+
+    MPI_Recv(old, size, MPI_DOUBLE, 0, SIM_TAG, MPI_COMM_WORLD, &s);
+    MPI_Recv(old, size, MPI_DOUBLE, 0, SIM_TAG, MPI_COMM_WORLD, &s);
+
+    printf("Old[7]    : %f\n", old[7]);
+    printf("Current[7]: %f\n", current[7]);
 
     /* You should return a pointer to the array with the final results. */
-    return current_array;
+    return NULL;
 }

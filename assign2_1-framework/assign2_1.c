@@ -14,6 +14,8 @@
 #include "timer.h"
 #include "simulate.h"
 
+#define SIM_TAG 0
+
 typedef double (*func_t)(double x);
 
 /*
@@ -146,12 +148,22 @@ int main(int argc, char *argv[])
         timer_start();
         
         // calculate the size of the arrays for each process
-        int stepsize = ((i_max - 2) / totalnum) + 1;
+        int stepsize = ((i_max - 2) / (totalnum - 1)) + 1;
 
         for (int i = 1; i < totalnum; ++i) {
-            int i_min = 1 + i * stepsize;
-            int i_max = args->i_min + stepsize;
+            int min = 1 + i * stepsize;
+            int max = min + stepsize;
 
+            // calculate and send the size of the array
+            int *array_size = (int *) malloc(sizeof(int));
+            *array_size = min + stepsize;
+            *array_size = *array_size > max ? max : *array_size;
+            *array_size -= min;
+            MPI_Send(array_size, 1, MPI_INT, i, SIM_TAG, MPI_COMM_WORLD);
+
+            // send the array slices to the appropriate processes
+            MPI_Send(old + min, *array_size, MPI_DOUBLE, i, SIM_TAG, MPI_COMM_WORLD);
+            MPI_Send(current + min, *array_size, MPI_DOUBLE, i, SIM_TAG, MPI_COMM_WORLD);
         }
     }
 
