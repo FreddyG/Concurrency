@@ -1,0 +1,33 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\author{Maarten de Jonge}
+\date{\today}
+\title{Concurrency and Parallel Programming \\
+\large{Assignment 2}}
+
+\begin{document}
+\maketitle
+
+\section*{Wave Equation}
+Unfortunately, due to a lack of time on my part, this part of the assignment is
+not finished; the code is messy and doesn't run correctly yet. The attempted
+implementation is similar to last week's assignment, except that the process
+ranked 0 will send slices of the array to each process. This means that the
+program would require at least two MPI processes, otherwise there would be no
+worker processes available.
+
+\section*{Collective Communication}
+The broadcast function is implemented with the assumption that it's running on a
+ring-shaped network, where each process is connected to the processes with a
+rank of 1 higher/lower. The process opposite the root is determined as having
+the rank $r_{root} + (N / 2)$, where $r_{root}$ is the rank of the root and $N$
+is the total number of processes. The root sends its message to both its
+neighbours, which each pass it on until the messages converge at the process
+opposite of the root, which can receive the message from either side. A simple
+'main' function is included to demonstrate that it works correctly.
+
+\end{document}
