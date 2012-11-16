@@ -33,7 +33,7 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
     double C = 0.3;
 
     for (int t = 0; t < t_max; ++t) {
-        #pragma omp parallel for
+        #pragma omp parallel for schedule(runtime)
         for (int i = 1; i < i_max - 1; ++i) {
             next_array[i] = 3 * current_array[i] - old_array[i] +
                 C * (current_array[i-1] - (2 * current_array[i] -
