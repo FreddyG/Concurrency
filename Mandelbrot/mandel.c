@@ -23,7 +23,12 @@ const double dxy = 0.005;
 #include <stdio.h>
 #include <limits.h>
 
+#include <unistd.h>
+#include <omp.h>
+#include "timer.h"
+
 int main(void) {
+    timer_start();
 
     double cx, cy;
     double zx, zy, new_zx;
@@ -38,18 +43,34 @@ int main(void) {
     // before the magnitude of z exceeds 2, or UCHAR_MAX, whichever is
     // smaller.
 
-    for (cy = yMin; cy < yMax; cy += dxy) {
-        for (cx = xMin; cx < xMax; cx += dxy) {
+    // needed because OpenMP can only parallelize for loops with integer loop
+    // variables
+    int cx_iter, cy_iter;
+    int xmin_iter = (int)(xMin * 1000),
+        ymin_iter = (int)(yMin * 1000);
+    int xmax_iter = (int)(xMax * 1000),
+        ymax_iter = (int)(yMax * 1000);
+    int dxy_iter  = (int)(dxy * 1000);
+
+    for (cy_iter = ymin_iter; cy_iter < ymax_iter; cy_iter += dxy_iter) {
+        #pragma omp parallel for shared(cy_iter)
+        for (cx_iter = xmin_iter; cx_iter <= xmax_iter; cx_iter += dxy_iter) {
+            cx = ((double)cx_iter) / 1000;
+            cy = ((double)cy_iter) / 1000;
             zx = 0.0; 
             zy = 0.0; 
             n = 0;
             while ((zx*zx + zy*zy < 4.0) && (n != UCHAR_MAX)) {
                 new_zx = zx*zx - zy*zy + cx;
                 zy = 2.0*zx*zy + cy;
-	        zx = new_zx;
-	        n++;
+                zx = new_zx;
+                n++;
             }
+
+            #pragma omp critical
+            {
             write (1, &n, sizeof(n)); // Write the result to stdout
+            }
         }
     }
 
@@ -66,7 +87,9 @@ int main(void) {
     }
 
     fprintf (stderr, "To process the image: convert -depth 8 -size %dx%d gray:output out.jpg\n",
-	     nx, ny);
+             nx, ny);
+    double elapsed = timer_end();
+    fprintf(stderr, "Time elapsed: %f seconds\n", elapsed);
     return 0;
 }
 

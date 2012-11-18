@@ -1,0 +1,67 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\author{Maarten de Jonge}
+\date{\today}
+\title{Concurrency and Parallel Programming \\
+\large{Assignment 3}}
+
+\begin{document}
+\maketitle
+
+\section*{Wave Equation}
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+        \hline
+        i\_max    & t\_max   & num\_threads & time pthreads   & time OMP \\
+        \hline
+        1000     & 1000000 & 1           & 42.4294 & 2.7425  \\
+        1000     & 1000000 & 2           & 31.5108 & 42.3953 \\
+        1000     & 1000000 & 4           & 80.9137 & 20.493  \\
+        1000     & 1000000 & 8           & 167.284 & 23.8034 \\
+        1000     & 1000000 & 16          & 350.395 & 21.2966 \\
+        10000    & 500000  & 1           & 69.3228 & 12.4777 \\
+        10000    & 500000  & 2           & 44.066  & 85.0008 \\
+        10000    & 500000  & 4           & 41.1647 & 47.4733 \\
+        10000    & 500000  & 8           & 85.3845 & 36.9657 \\
+        10000    & 500000  & 16          & 183.268 & 33.3651 \\
+        1000000  & 5000    & 1           & 52.108  & 15.6997 \\
+        1000000  & 5000    & 2           & 25.6232 & 83.3668 \\
+        1000000  & 5000    & 4           & 13.1806 & 42.1536 \\
+        1000000  & 5000    & 8           & 7.08639 & 27.3887 \\
+        1000000  & 5000    & 16          & 7.06076 & 29.6989 \\
+        10000000 & 500     & 1           & 51.4277 & 15.1485 \\
+        10000000 & 500     & 2           & 25.8168 & 83.1574 \\
+        10000000 & 500     & 4           & 13.0537 & 41.439  \\
+        10000000 & 500     & 8           & 7.21982 & 27.4845 \\
+        10000000 & 500     & 16          & 7.16489 & 36.9947 \\
+        \hline
+    \end{tabular}
+    \caption{The raw test data, where ``i\_max'' is the number of simulated points
+    on the wave and ``t\_max'' is the amount of iterations.}
+    \label{table:results}
+\end{table}
+
+Table \ref{table:results} shows the results both using pthreads and using
+OpenMP. A few things are noticable here:
+\begin{itemize}
+    \item The situations with 1 thread are significantly faster with OpenMP.
+          This is posibly because the pthread version of the code spawns a new thread
+          for each time iteration, even though that's unnecessary when only using a
+          single thread. OpenMP might handle this more graciously.
+    \item In general, it seems OpenMP handles the "bad" cases (the ones where
+          there's not enough workload per thread to be worthwhile) better than the
+          threaded code, with a smaller performance loss.
+    \item When the amount of simulated points becomes high enough, the threaded
+          solution is faster than the OpenMP one every time.
+    \item With the OpenMP code, the optimal number of threads is 1 for every set
+          of parameters; using more threads actually slows it down. This might indicate
+          that I did not use OpenMP optimally.
+\end{itemize}
+
+
+\end{document}
