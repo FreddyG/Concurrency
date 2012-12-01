@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/forester-0.955.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/biojava3-core-3.0.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/bytecode-1.8.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/core-1.8.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/alignment-1.8.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/biojava3-alignment-3.0.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
