@@ -7,14 +7,42 @@
 \author{Maarten de Jonge}
 \date{\today}
 \title{Concurrency and Parallel Programming \\
-\large{Assignment 4 - Hadoop and MapReduce}}
-
-\section*{Hadoop}
-Hadoop consists of two parts; a distributed filesystem (HDFS) and a MapReduce
-framework. HDFS 
+       \large{Assignment 4 - Hadoop and MapReduce}}
 
 \begin{document}
 \maketitle
 
+\section*{Hadoop}
+
+\subsection*{Purpose}
+Hadoop is a framework for processing huge datasets on huge clusters of
+commodity hardware. When used on large sets of independent data, it's relatively
+easy to spread the workload over tens to thousands of machines, leading to
+immense scalability.
+
+\subsection*{Architecture}
+Hadoop consists mainly of two parts; a distributed filesystem (HDFS) and a MapReduce
+engine.
+
+\subsubsection*{HDFS}
+HDFS consists of a single \emph{namenode} along with a cluster of
+\emph{datanodes}. The namenode contains the directory tree and locations of each
+file within the cluster, while the datanodes hold the actual data. The data can
+be stored with a configurable level of redundancy, and failures of the datanodes
+will generally not be much of a problem. However, failure of the namenode will
+render the cluster unreachable.
+
+\subsubsection*{MapReduce}
+The MapReduce engine consists of a \emph{jobtracker}, a number of
+\emph{tasktrackers} and the \emph{Map} and \emph{Reduce} functions.
+
+The jobtracker is responsible for dividing the workload between the available
+tasktrackers.
+
+The \texttt{Map} function takes a list of key-value pairs, and produces a new
+list of key-value pairs. The resulting data is grouped by key, and the
+\texttt{Reduce} function receives one key and a list of values corresponding to
+that key (according to the output of \texttt{Map}), returning a single value per
+key.
 
 \end{document}
