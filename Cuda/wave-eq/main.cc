@@ -91,9 +91,9 @@ int main(int argc, char *argv[])
     }
 
     /* Allocate and initialize buffers. */
-    old = malloc(i_max * sizeof(double));
-    current = malloc(i_max * sizeof(double));
-    next = malloc(i_max * sizeof(double));
+    old = (double*) malloc(i_max * sizeof(double));
+    current = (double*) malloc(i_max * sizeof(double));
+    next = (double*) malloc(i_max * sizeof(double));
 
     if (old == NULL || current == NULL || next == NULL) {
         fprintf(stderr, "Could not allocate enough memory, aborting.\n");
