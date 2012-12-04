@@ -112,7 +112,7 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
     // the main loop
     double *temp_old;
     for (int t = 0; t < t_max; ++t) {
-        simulationKernel <<< 1, THREADS_PER_BLOCK >>>
+        simulationKernel <<< 480, 512 >>>
             (stepsize, i_max, d_old, d_current, d_next);
 
         // swap the arrays around
