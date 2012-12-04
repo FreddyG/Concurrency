@@ -1,72 +1,28 @@
-#include <cstdlib>
-#include <cstring>
-#include <fstream>
-#include <iomanip>
+#include <time.h>
 
 #include "timer.h"
 
-using namespace std;
+struct timespec start_time;
 
-double timer::CPU_speed_in_MHz = timer::get_CPU_speed_in_MHz();
+/*
+ * Starts the timing. Get a result by calling timer_end afterwards.
+ */
+void timer_start(void)
+{
+    clock_gettime(CLOCK_REALTIME, &start_time);
+}
 
+/*
+ * Returns the elapsed time since calling timer_start in seconds.
+ * Results when calling this without calling timer_end are undefined.
+ */
+double timer_end(void)
+{
+    struct timespec end_time;
+    clock_gettime(CLOCK_REALTIME, &end_time);
 
-double timer::get_CPU_speed_in_MHz() {
-#if defined __linux__
-    ifstream infile("/proc/cpuinfo");
-    char     buffer[256], *colon;
-
-    while (infile.good()) {
-	infile.getline(buffer, 256);
-
-	if (strncmp("cpu MHz", buffer, 7) == 0 && (colon = strchr(buffer, ':')) != 0)
-	    return atof(colon + 2);
-    }
-#endif
-
-    return 0.0;
+    return difftime(end_time.tv_sec, start_time.tv_sec) +
+        (end_time.tv_nsec - start_time.tv_nsec) / 1000000000.;
 }
 
 
-void timer::print_time(ostream &str, const char *which, double time) const {
-    static const char *units[] = { " ns", " us", " ms", "  s", " ks", 0 };
-    const char	      **unit   = units;
-
-    time = 1000.0 * time / CPU_speed_in_MHz;
-
-    while (time >= 999.5 && unit[1] != 0) {
-	time /= 1000.0;
-	++ unit;
-    }
-
-    str << which << " = " << setprecision(3) << setw(4) << time << *unit;
-}
-
-
-ostream &timer::print(ostream &str) {
-    str << left << setw(25) << (name != 0 ? name : "timer") << ": " << right;
-
-    if (CPU_speed_in_MHz == 0)
-	str << "could not determine CPU speed\n";
-    else if (count > 0) {
-	double total = static_cast<double>(total_time);
-
-	print_time(str, "avg", total / static_cast<double>(count));
-	print_time(str, ", total", total);
-	str << ", count = " << setw(9) << count << '\n';
-    }
-    else
-	str << "not used\n";
-
-    return str;
-}
-
-
-ostream &operator << (ostream &str, class timer &timer) {
-    return timer.print(str);
-}
-
-double timer::getTimeInSeconds() {
-    double total = static_cast<double>(total_time);
-    double res = (total / 1000000.0) / CPU_speed_in_MHz;
-    return res;
-}

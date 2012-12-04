@@ -5,7 +5,7 @@ CU_FLAGS	= -O3 -g --ptxas-options=-v -arch compute_20 -code sm_20
 CC_FLAGS	= -O3 -m64 -Wall
 
 CU_SOURCES	= simulate.cu
-CC_SOURCES	= main.c timer.c file.c
+CC_SOURCES	= main.cc timer.cc file.cc
 
 CU_OBJECTS	= $(CU_SOURCES:%.cu=%.o)
 CU_PTX		= $(CU_SOURCES:%.cu=%.ptx)
