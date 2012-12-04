@@ -45,6 +45,7 @@ __global__ void simulationKernel(int stepsize, int max,
 
     // determine the boundaries for this particular block
     unsigned index = blockIdx.x * blockDim.x + threadIdx.x;
+    cout << "range: " << i_min << ", " << i_max << endl;
     int i_min = 1 + index * stepsize;
     int i_max = i_min + stepsize;
 
@@ -110,12 +111,14 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
     checkCudaCall(cudaMemcpy(d_next, next_array, i_max*sizeof(double), cudaMemcpyHostToDevice));
 
     // the main loop
+    int blocks = num_threads / THREADS_PER_BLOCK;
+    double *temp_old;
     for (int t = 0; t < t_max; ++t) {
-        simulationKernel <<< num_threads/THREADS_PER_BLOCK, THREADS_PER_BLOCK >>>
+        simulationKernel <<< blocks, THREADS_PER_BLOCK >>>
             (stepsize, i_max, d_old, d_current, d_next);
 
         // swap the arrays around
-        double *temp_old = d_old;
+        *temp_old = d_old;
         d_old = d_current;
         d_current = d_next;
         d_next = temp_old;
