@@ -15,6 +15,8 @@
 
 using namespace std;
 
+double C = 0.2;
+
 /* Utility function, use to do error checking.
 
    Use this function like this:
@@ -74,28 +76,28 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
     int stepsize = ((i_max - 2) / num_threads) + 1;
 
     // allocate the vectors on the GPU
-    float* d_old = NULL;
+    double* d_old = NULL;
     checkCudaCall(cudaMalloc((void **) &d_old, i_max * sizeof(double)));
     if (d_old == NULL) {
         cout << "could not allocate memory!" << endl;
-        return;
+        exit(1);
     }
 
     double* d_current = NULL;
     checkCudaCall(cudaMalloc((void **) &d_current, i_max * sizeof(double)));
     if (d_current == NULL) {
-        checkCudaCall(cudaFree(deviceA));
+        checkCudaCall(cudaFree(d_old));
         cout << "could not allocate memory!" << endl;
-        return;
+        exit(1);
     }
 
     double* d_next = NULL;
     checkCudaCall(cudaMalloc((void **) &d_next, i_max * sizeof(double)));
     if (d_next == NULL) {
-        checkCudaCall(cudaFree(deviceA));
-        checkCudaCall(cudaFree(deviceB));
+        checkCudaCall(cudaFree(d_old));
+        checkCudaCall(cudaFree(d_current));
         cout << "could not allocate memory!" << endl;
-        return;
+        exit(1);
     }
 
     // copy the data to the GPU
@@ -105,7 +107,8 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
 
     // the main loop
     for (int t = 0; t < t_max; ++t) {
-        add <<< num_threads, 1 >>> (stepsize, max, old_dev, curr_dev, next_dev);
+        simulationKernel <<< num_threads, 1 >>>
+            (stepsize, max, d_old, d_current, d_next);
 
         // swap the arrays around
         double *temp_old = d_old;
