@@ -13,6 +13,8 @@
 
 #include <iostream>
 
+#define THREADS_PER_BLOCK 512
+
 using namespace std;
 
 /* Utility function, use to do error checking.
@@ -42,7 +44,8 @@ __global__ void simulationKernel(int stepsize, int max,
     double C = 0.2;
 
     // determine the boundaries for this particular block
-    int i_min = 1 + blockIdx.x * stepsize;
+    unsigned index = blockIdx.x * blockDim.x + threadIdx.x;
+    int i_min = 1 + index * stepsize;
     int i_max = i_min + stepsize;
 
     /* make sure that i_max doesn't get too large
@@ -108,7 +111,7 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
 
     // the main loop
     for (int t = 0; t < t_max; ++t) {
-        simulationKernel <<< num_threads, 1 >>>
+        simulationKernel <<< num_threads/THREADS_PER_BLOCK, THREADS_PER_BLOCK >>>
             (stepsize, i_max, d_old, d_current, d_next);
 
         // swap the arrays around
