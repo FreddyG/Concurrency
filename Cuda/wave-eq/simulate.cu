@@ -15,8 +15,6 @@
 
 using namespace std;
 
-double C = 0.2;
-
 /* Utility function, use to do error checking.
 
    Use this function like this:
@@ -40,6 +38,9 @@ __global__ void simulationKernel(int stepsize, int max,
                                  double *current,
                                  double *next)
 {
+    // constant used in the equation
+    double C = 0.2;
+
     // determine the boundaries for this particular block
     int i_min = 1 + blockIdx.x * stepsize;
     int i_max = i_min + stepsize;
@@ -108,7 +109,7 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
     // the main loop
     for (int t = 0; t < t_max; ++t) {
         simulationKernel <<< num_threads, 1 >>>
-            (stepsize, max, d_old, d_current, d_next);
+            (stepsize, i_max, d_old, d_current, d_next);
 
         // swap the arrays around
         double *temp_old = d_old;
