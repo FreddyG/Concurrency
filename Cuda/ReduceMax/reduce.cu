@@ -34,30 +34,62 @@ static void checkCudaCall(cudaError_t result) {
     }
 }
 
-// The kernel to reduce a slice of an array
-__global__ void reduceKernel(double *array, int N, int range, double *out)
-{
-    // determine the boundaries for this particular block
-    unsigned index = blockIdx.x * blockDim.x + threadIdx.x;
-    int end = index + range;
-    
-    int min = array[index]
-    for (int i = index + 1; i < end; ++i) {
-        // check if it's smaller than the previous minimum, and replace it if so
-        if (array[i] < min) {
-            min = array[i]
-        }
+__device__ int nextPowOfTwo(int n) {
+    // 0 is also a power of 2
+    if (n == 0) {
+        return n;
     }
 
-    // copy the minmum value to the output pointer
-    *out = min;
+    else {
+        int pow = 1;
+        while ( pow < n ) {
+            n *= 2;
+        }
+
+        return pow;
+    }
+}
+
+// Finds the minimum value in an array
+__global__ void reduceKernel(double *array, int N, double *out)
+{
+    // Reduction (min/max/avr/sum), works for any blockDim.x:
+    int thread2;
+    double temp;
+    __shared__ double min[THREADS_PER_BLOCK];
+
+	// Total number of threads, rounded up to the next power of two
+    int nTotalThreads = nextPowOfTwo(blockDim.x);
+
+    // tree-wise reduction
+    while(nTotalThreads > 1)
+    {
+        int halfPoint = (nTotalThreads / 2);	// divide by two
+        // only the first half of the threads will be active.
+
+        if (threadIdx.x < halfPoint)
+        {
+            thread2 = threadIdx.x + halfPoint;
+
+            // Skipping the fictious threads blockDim.x ... blockDim_2-1
+            if (thread2 < blockDim.x)
+            {
+                // Get the shared value stored by another thread
+                temp = min[thread2];
+                if (temp < min[threadIdx.x])
+                    min[threadIdx.x] = temp; 
+            }
+        }
+        __syncthreads();
+
+        // Reducing the binary tree size by two:
+        nTotalThreads = halfPoint;
+    }
 }
 
 // return the mimum value of a given array
-double reduce_min(double *array, int N, )
+double reduce_min(double *array, int N)
 {
-    int stepsize = ((i_max - 2) / num_threads) + 1;
-
     // allocate the array and result pointer on the GPU
     double* dev_array = NULL;
     double* dev_result = NULL;
@@ -78,14 +110,17 @@ double reduce_min(double *array, int N, )
     // copy the data to the GPU
     checkCudaCall(cudaMemcpy(dev_array, array, N*sizeof(double), cudaMemcpyHostToDevice));
 
-    // the main loop, where the array gets reduced treewise
-    for (;;) {
-        reduceKernel <<< 8, THREADS_PER_BLOCK >>>
-            (stepsize, i_max, d_old, d_current, d_next);
-    }
+    // calculate the amount of blocks to be used
+    // The first kernel invocation should reduce the array to one that can be
+    // reduced by one block, so there should be THREADS_PER_BLOCK elements left
+    int blocks = (N / 2) / THREADS_PER_BLOCK;
 
-    // copy the data back to the main program
-    checkCudaCall(cudaMemcpy(array, dev_array, N*sizeof(double), cudaMemcpyDeviceToHost));
+    reduceKernel <<< blocks, THREADS_PER_BLOCK >>>
+        (stepsize, i_max, d_old, d_current, d_next);
 
-    return current_array;
+    // copy the result back to the main program
+    double *result = NULL;
+    checkCudaCall(cudaMemcpy(result, dev_result, sizeof(double), cudaMemcpyDeviceToHost));
+
+    return *result;
 }
