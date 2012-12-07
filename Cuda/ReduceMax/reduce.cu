@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <string.h>
 
-#include "simulate.h"
+#include "reduce.h"
 
 #include <iostream>
 
