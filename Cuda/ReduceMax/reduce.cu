@@ -34,6 +34,7 @@ static void checkCudaCall(cudaError_t result) {
     }
 }
 
+// Returns the next power of 2 that is >= n
 __device__ int nextPowOfTwo(int n) {
     // 0 is also a power of 2
     if (n == 0) {
@@ -71,7 +72,7 @@ __global__ void reduceKernel(double *array, int N, double *out)
         {
             thread2 = threadIdx.x + halfPoint;
 
-            // Skipping the fictious threads blockDim.x ... blockDim_2-1
+            // make sure we're not dealing with a non-existent thread
             if (thread2 < blockDim.x)
             {
                 // Get the shared value stored by another thread
@@ -116,7 +117,7 @@ double reduce_min(double *array, int N)
     int blocks = (N / 2) / THREADS_PER_BLOCK;
 
     reduceKernel <<< blocks, THREADS_PER_BLOCK >>>
-        (stepsize, i_max, d_old, d_current, d_next);
+        (dev_array, N, dev_result);
 
     // copy the result back to the main program
     double *result = NULL;
