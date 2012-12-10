@@ -4,4 +4,4 @@
 
 #pragma once
 
-double reduce_min(double *array, int N)
+double reduce_min(double *array, int N);
