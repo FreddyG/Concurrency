@@ -24,7 +24,7 @@ double fRand(double fMin, double fMax)
 int main(int argc, char *argv[])
 {
     double *array = NULL;
-    *array = (double *) malloc(ARRAY_SIZE * sizeof(double));
+    array = (double *) malloc(ARRAY_SIZE * sizeof(double));
 
     if (array == NULL) {
         printf("Error: malloc failed\n");
