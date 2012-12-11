@@ -51,16 +51,14 @@ void fill(double *array, int offset, int range, double sample_start,
 int main(int argc, char *argv[])
 {
     double *old, *current, *next, *ret;
-    int t_max, i_max, num_threads;
+    int t_max, i_max;
     double time;
 
-    /* Parse commandline args: i_max t_max num_threads */
+    /* Parse commandline args: i_max t_max */
     if (argc < 4) {
-        printf("Usage: %s i_max t_max num_threads [initial_data]\n", argv[0]);
+        printf("Usage: %s i_max t_max [initial_data]\n", argv[0]);
         printf(" - i_max: number of discrete amplitude points, should be >2\n");
         printf(" - t_max: number of discrete timesteps, should be >=1\n");
-        printf(" - num_threads: number of threads to use for simulation, "
-                "should be >=1\n");
         printf(" - initial_data: select what data should be used for the first "
                 "two generation.\n");
         printf("   Available options are:\n");
@@ -75,18 +73,14 @@ int main(int argc, char *argv[])
 
     i_max = atoi(argv[1]);
     t_max = atoi(argv[2]);
-    num_threads = atoi(argv[3]);
 
     if (i_max < 3) {
         printf("argument error: i_max should be >2.\n");
         return EXIT_FAILURE;
     }
+
     if (t_max < 1) {
         printf("argument error: t_max should be >=1.\n");
-        return EXIT_FAILURE;
-    }
-    if (num_threads < 1) {
-        printf("argument error: num_threads should be >=1.\n");
         return EXIT_FAILURE;
     }
 
@@ -136,7 +130,7 @@ int main(int argc, char *argv[])
     timer_start();
 
     /* Call the actual simulation that should be implemented in simulate.c. */
-    ret = simulate(i_max, t_max, num_threads, old, current, next);
+    ret = simulate(i_max, t_max, old, current, next);
 
     time = timer_end();
     printf("Took %g seconds\n", time);

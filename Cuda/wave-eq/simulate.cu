@@ -74,9 +74,18 @@ __global__ void simulationKernel(int stepsize, int max,
  * current_array: array of size i_max filled with data for t
  * next_array: array of size i_max. You should fill this with t+1
  */
-double *simulate(const int i_max, const int t_max, const int num_blocks,
+double *simulate(const int i_max, const int t_max,
                  double *old_array, double *current_array, double *next_array)
 {
+    // calculate the number of blocks to be used
+    // ensure it's between 1 and 65535 (the maximum number of blocks that can
+    // run concurrently)
+    int num_blocks = (i_max / THREADS_PER_BLOCKS);
+    if (num_blocks == 0)
+        num_blocks = 1;
+    else if (num_blocks > 65535)
+        num_blocks = 65535;
+
     int stepsize = ((i_max - 2) / (num_blocks * THREADS_PER_BLOCK)) + 1;
 
     // allocate the vectors on the GPU
