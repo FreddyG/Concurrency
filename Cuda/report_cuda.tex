@@ -1,0 +1,84 @@
+\documentclass[a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\author{Maarten de Jonge}
+\date{\today}
+\title{Concurrency and Parallel Programming \\
+\large{CUDA assignment}}
+
+\begin{document}
+\maketitle
+
+\section*{Wave Equation}
+The implementation was done similarly to the previous assignments; each thread
+gets a slice of the wave to simulate, although in this case the slices are
+markedly smaller than previously due to the enormous amount of threads. The
+amount of threads per block has been set at 512, while the number of blocks is
+taken as the number of simulated points divided by the number of threads (so
+ideally, every thread would only simulate a single point). Because the device
+can only run 65535 blocks in parallel, the number of blocks is limited to the
+interval $[1, 65535]$.
+
+The time iterations are synchronized by only handling a single iteration in the
+kernel, leading to one kernel invocation per time step.
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+        \hline
+        i\_max    & t\_max   & num\_threads & time pthreads   & time OMP \\
+        \hline
+        1000     & 1000000 & 1           & 42.4294 & 2.7425  \\
+        1000     & 1000000 & 2           & 31.5108 & 42.3953 \\
+        1000     & 1000000 & 4           & 80.9137 & 20.493  \\
+        1000     & 1000000 & 8           & 167.284 & 23.8034 \\
+        1000     & 1000000 & 16          & 350.395 & 21.2966 \\
+        10000    & 500000  & 1           & 69.3228 & 12.4777 \\
+        10000    & 500000  & 2           & 44.066  & 85.0008 \\
+        10000    & 500000  & 4           & 41.1647 & 47.4733 \\
+        10000    & 500000  & 8           & 85.3845 & 36.9657 \\
+        10000    & 500000  & 16          & 183.268 & 33.3651 \\
+        1000000  & 5000    & 1           & 52.108  & 15.6997 \\
+        1000000  & 5000    & 2           & 25.6232 & 83.3668 \\
+        1000000  & 5000    & 4           & 13.1806 & 42.1536 \\
+        1000000  & 5000    & 8           & 7.08639 & 27.3887 \\
+        1000000  & 5000    & 16          & 7.06076 & 29.6989 \\
+        10000000 & 500     & 1           & 51.4277 & 15.1485 \\
+        10000000 & 500     & 2           & 25.8168 & 83.1574 \\
+        10000000 & 500     & 4           & 13.0537 & 41.439  \\
+        10000000 & 500     & 8           & 7.21982 & 27.4845 \\
+        10000000 & 500     & 16          & 7.16489 & 36.9947 \\
+        \hline
+    \end{tabular}
+    \caption{The raw test data, where ``i\_max'' is the number of simulated points
+    on the wave and ``t\_max'' is the amount of iterations.}
+    \label{table:results}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{l|l|l}
+        \hline
+        i\_max & t\_max & time taken (s) \\
+        \hline
+        1000     & 1000000 & 4.2354 \\
+        10000    & 500000  & 2.3655 \\
+        1000000  & 5000    & 1.6818 \\
+        10000000 & 500     & 1.9001 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Table \ref{table:results} shows the results of the old experiments using
+pthreads and OpenMP.
+For the CUDA experiments, shown in table \ref{table:cuda}, each trial has been
+run 10 times and averaged to account for relatively large fluctuations in
+runtime.
+
+The results are quite clear; compared to the previous implementations, CUDA is
+fast as shit.
+
+\end{document}
