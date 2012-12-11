@@ -23,7 +23,12 @@ double fRand(double fMin, double fMax)
 
 int main(int argc, char *argv[])
 {
-    double array[ARRAY_SIZE];
+    double *array = NULL;
+    *array = (double *) malloc(ARRAY_SIZE * sizeof(double));
+
+    if (array == NULL) {
+        printf("Error: malloc failed\n");
+    }
 
     // fill the array with random numbers
     srand(0);
