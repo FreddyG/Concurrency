@@ -120,8 +120,8 @@ double reduce_min(double *array, int N)
         (dev_array, N, dev_result);
 
     // copy the result back to the main program
-    double *result = NULL;
+    double result[1];
     checkCudaCall(cudaMemcpy(result, dev_result, sizeof(double), cudaMemcpyDeviceToHost));
 
-    return *result;
+    return result[0];
 }
