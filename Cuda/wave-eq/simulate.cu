@@ -80,7 +80,7 @@ double *simulate(const int i_max, const int t_max,
     // calculate the number of blocks to be used
     // ensure it's between 1 and 65535 (the maximum number of blocks that can
     // run concurrently)
-    int num_blocks = (i_max / THREADS_PER_BLOCKS);
+    int num_blocks = (i_max / THREADS_PER_BLOCK);
     if (num_blocks == 0)
         num_blocks = 1;
     else if (num_blocks > 65535)
