@@ -69,15 +69,15 @@ __global__ void simulationKernel(int stepsize, int max,
  *
  * i_max: how many data points are on a single wave
  * t_max: how many iterations the simulation should run
- * num_threads: how many threads to use (excluding the main threads)
+ * num_blocks: how many threads to use (excluding the main threads)
  * old_array: array of size i_max filled with data for t-1
  * current_array: array of size i_max filled with data for t
  * next_array: array of size i_max. You should fill this with t+1
  */
-double *simulate(const int i_max, const int t_max, const int num_threads,
+double *simulate(const int i_max, const int t_max, const int num_blocks,
                  double *old_array, double *current_array, double *next_array)
 {
-    int stepsize = ((i_max - 2) / num_threads) + 1;
+    int stepsize = ((i_max - 2) / (num_blocks * THREADS_PER_BLOCK)) + 1;
 
     // allocate the vectors on the GPU
     double* d_old = NULL;
@@ -112,7 +112,7 @@ double *simulate(const int i_max, const int t_max, const int num_threads,
     // the main loop
     double *temp_old;
     for (int t = 0; t < t_max; ++t) {
-        simulationKernel <<< 480, 512 >>>
+        simulationKernel <<< num_blocks, 512 >>>
             (stepsize, i_max, d_old, d_current, d_next);
 
         // swap the arrays around
