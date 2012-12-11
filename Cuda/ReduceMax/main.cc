@@ -11,26 +11,40 @@
 #include <string.h>
 #include <math.h>
 
-#include <random>
-
 #include "reduce.h"
 
 #define ARRAY_SIZE 10000000
+
+double fRand(double fMin, double fMax)
+{
+    double f = (double)rand() / RAND_MAX;
+    return fMin + f * (fMax - fMin);
+}
 
 int main(int argc, char *argv[])
 {
     double array[ARRAY_SIZE];
 
     // fill the array with random numbers
-    std::default_random_engine generator;
-    std::uniform_double_distribution<double> distribution(1,10000);
+    srand(0);
     for (int i = 0; i < ARRAY_SIZE; ++i)
     {
-        array[i] = distribution(generator);
+        array[i] = fRand(1, 1000);
     }
 
     double min = reduce_min(array, ARRAY_SIZE);
-    printf("Min: %f\n", min);
+    printf("Parallel min: %f\n", min);
 
-    return EXIT_SUCCESS;
+    // find the min sequentially to validate the answer
+    double smin = array[0];
+    for (int i = 1; i < ARRAY_SIZE; ++i)
+    {
+        if (array[i] < smin) {
+            smin = array[i];
+        }
+    }
+
+    printf("Sequential min: %f\n", smin);
+
+    return 0;
 }
