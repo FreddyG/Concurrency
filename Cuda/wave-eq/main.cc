@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     double time;
 
     /* Parse commandline args: i_max t_max */
-    if (argc < 4) {
+    if (argc < 3) {
         printf("Usage: %s i_max t_max [initial_data]\n", argv[0]);
         printf(" - i_max: number of discrete amplitude points, should be >2\n");
         printf(" - t_max: number of discrete timesteps, should be >=1\n");
