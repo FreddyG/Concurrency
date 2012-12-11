@@ -54,38 +54,37 @@ __device__ int nextPowOfTwo(int n) {
 // Finds the minimum value in an array
 __global__ void reduceKernel(double *array, int N, double *out)
 {
-    // Reduction (min/max/avr/sum), works for any blockDim.x:
-    int thread2;
-    double temp;
-    __shared__ double min[THREADS_PER_BLOCK];
+    // each thread handles a chunk of the array, and writes it to block-shared
+    // memory, reducing the array to a new array with THREADS_PER_BLOCK
+    // elements.
+    __shared__ double min_per_thread[THREADS_PER_BLOCK];
+    
+    int stepsize = N / THREADS_PER_BLOCK;
 
-	// Total number of threads, rounded up to the next power of two
-    int nTotalThreads = nextPowOfTwo(blockDim.x);
+    int start = threadIdx.x * stepsize,
+        end   = start + stepsize;
 
-    // tree-wise reduction
-    while(nTotalThreads > 1)
-    {
-        int halfPoint = (nTotalThreads / 2);	// divide by two
-        // only the first half of the threads will be active.
+    double min = array[start];
+    for (int i = start + 1; i < end; ++i) {
+        if (array[i] < min) {
+            min = array[i];
+        }
+    }
 
-        if (threadIdx.x < halfPoint)
-        {
-            thread2 = threadIdx.x + halfPoint;
+    min_per_thread[threadIdx.x] = min;
+    __syncthreads();
 
-            // make sure we're not dealing with a non-existent thread
-            if (thread2 < blockDim.x)
-            {
-                // Get the shared value stored by another thread
-                temp = min[thread2];
-                if (temp < min[threadIdx.x])
-                    min[threadIdx.x] = temp; 
+    // one of the threads performs a further reduction step
+    min = min_per_thread[0];
+    if (threadIdx.x == 0) {
+        for (int i = 1; i < THREADS_PER_BLOCK; ++i) {
+            if (min_per_thread[i] < min) {
+                min = min_per_thread[i];
             }
         }
-        __syncthreads();
-
-        // Reducing the binary tree size by two:
-        nTotalThreads = halfPoint;
     }
+
+    out[0] = min;
 }
 
 // return the mimum value of a given array
@@ -111,12 +110,7 @@ double reduce_min(double *array, int N)
     // copy the data to the GPU
     checkCudaCall(cudaMemcpy(dev_array, array, N*sizeof(double), cudaMemcpyHostToDevice));
 
-    // calculate the amount of blocks to be used
-    // The first kernel invocation should reduce the array to one that can be
-    // reduced by one block, so there should be THREADS_PER_BLOCK elements left
-    int blocks = (N / 2) / THREADS_PER_BLOCK;
-
-    reduceKernel <<< blocks, THREADS_PER_BLOCK >>>
+    reduceKernel <<< 1, THREADS_PER_BLOCK >>>
         (dev_array, N, dev_result);
 
     // copy the result back to the main program

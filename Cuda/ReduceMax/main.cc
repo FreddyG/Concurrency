@@ -11,12 +11,25 @@
 #include <string.h>
 #include <math.h>
 
+#include <random>
+
 #include "reduce.h"
+
+#define ARRAY_SIZE 10000000
 
 int main(int argc, char *argv[])
 {
-    double array[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-    double min = reduce_min(array, 16);
+    double array[ARRAY_SIZE];
+
+    // fill the array with random numbers
+    std::default_random_engine generator;
+    std::uniform_double_distribution<double> distribution(1,10000);
+    for (int i = 0; i < ARRAY_SIZE; ++i)
+    {
+        array[i] = distribution(generator);
+    }
+
+    double min = reduce_min(array, ARRAY_SIZE);
     printf("Min: %f\n", min);
 
     return EXIT_SUCCESS;

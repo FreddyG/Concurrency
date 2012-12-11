@@ -20,10 +20,10 @@ CC_OBJECTS	= $(CC_SOURCES:%.cc=%.o)
 %.ptx:		%.cu
 		$(NVCC) $(CU_FLAGS) --ptx $< -o $@
 
-wave:	$(CU_OBJECTS) $(CC_OBJECTS)
+reduce:	$(CU_OBJECTS) $(CC_OBJECTS)
 		$(NVCC) $^ -o $@
 
 ptx:		$(CU_PTX) 
 
 clean:
-		rm -f *.o wave *~
+		rm -f *.o reduce *~
