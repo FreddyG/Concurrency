@@ -34,7 +34,7 @@ static void checkCudaCall(cudaError_t result) {
     }
 }
 
-// Finds the minimum value in an array
+// Finds the maximum value in an array
 __global__ void reduceKernel(double *array, int N, double *out)
 {
     // each thread handles a chunk of the array, and writes it to block-shared
@@ -59,7 +59,7 @@ __global__ void reduceKernel(double *array, int N, double *out)
         }
     }
 
-    max_per_thread[threadIdx.x] = min;
+    max_per_thread[threadIdx.x] = max;
     __syncthreads();
 
     // one of the threads performs a further reduction step
