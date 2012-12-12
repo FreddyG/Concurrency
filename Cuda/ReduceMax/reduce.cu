@@ -40,7 +40,7 @@ __global__ void reduceKernel(double *array, int N, double *out)
     // each thread handles a chunk of the array, and writes it to block-shared
     // memory, reducing the array to a new array with THREADS_PER_BLOCK
     // elements.
-    __shared__ double min_per_thread[THREADS_PER_BLOCK];
+    __shared__ double max_per_thread[THREADS_PER_BLOCK];
     
     int stepsize = N / THREADS_PER_BLOCK;
 
@@ -48,14 +48,14 @@ __global__ void reduceKernel(double *array, int N, double *out)
         end   = start + stepsize;
 
     // make sure the entire array gets checked
-    if (threadIdx.x == THREADS_PER_BLOCK - 1) {
+    if (threadIdx.x == ()THREADS_PER_BLOCK - 1) {
         end = N;
     }
 
-    double min = array[start];
+    double max = array[start];
     for (int i = start + 1; i < end; ++i) {
-        if (array[i] < min) {
-            min = array[i];
+        if (array[i] > max) {
+            max = array[i];
         }
     }
 
@@ -63,16 +63,16 @@ __global__ void reduceKernel(double *array, int N, double *out)
     __syncthreads();
 
     // one of the threads performs a further reduction step
-    min = min_per_thread[0];
+    max = max_per_thread[0];
     if (threadIdx.x == 0) {
         for (int i = 1; i < THREADS_PER_BLOCK; ++i) {
-            if (min_per_thread[i] < min) {
-                min = min_per_thread[i];
+            if (max_per_thread[i] > max) {
+                max = max_per_thread[i];
             }
         }
-    }
 
-    out[0] = min;
+        out[0] = max;
+    }
 }
 
 // return the mimum value of a given array
