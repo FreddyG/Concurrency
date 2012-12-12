@@ -13,6 +13,7 @@
 \maketitle
 
 \section*{Wave Equation}
+\subsection*{Implementation}
 The implementation was done similarly to the previous assignments; each thread
 gets a slice of the wave to simulate, although in this case the slices are
 markedly smaller than previously due to the enormous amount of threads. The
@@ -24,6 +25,14 @@ interval $[1, 65535]$.
 
 The time iterations are synchronized by only handling a single iteration in the
 kernel, leading to one kernel invocation per time step.
+
+\subsection*{Results}
+Table \ref{table:results} shows the results of the old experiments using
+pthreads and OpenMP.
+For the CUDA experiments, shown in table \ref{table:cuda}, each trial has been
+run 10 times and averaged to account for relatively large fluctuations in
+runtime.
+
 
 \begin{table}[htbp]
     \centering
@@ -60,7 +69,7 @@ kernel, leading to one kernel invocation per time step.
 
 \begin{table}[htbp]
     \centering
-    \begin{tabular}{l|l|l}
+    \begin{tabular}{|l|l|l|}
         \hline
         i\_max & t\_max & time taken (s) \\
         \hline
@@ -74,18 +83,12 @@ kernel, leading to one kernel invocation per time step.
     \label{table:cuda}
 \end{table}
 
-Table \ref{table:results} shows the results of the old experiments using
-pthreads and OpenMP.
-For the CUDA experiments, shown in table \ref{table:cuda}, each trial has been
-run 10 times and averaged to account for relatively large fluctuations in
-runtime.
-
 The results are quite clear; compared to the previous implementations, CUDA is
 really really fast.
 
 \begin{table}[htbp]
     \centering
-    \begin{tabular}{l|l|l}
+    \begin{tabular}{|l|l|l}
         \hline
         threads per block & time taken (s) \\
         \hline
@@ -112,7 +115,7 @@ threads, but there are clear diminishing returns. Because the number of blocks
 in 1 dimension is limited to 65535, a low number of threads will equal a larger
 chunk of the wave to be handled per thread, and thus less parallelism.
 
-\section{Reduction}
+\section*{Reduction}
 The first version of the reduction algorithm uses a simple architecture with 1
 block and 512 threads per block. Each thread reduces a chunk of the input array,
 reducing the array to one of 512 elements. Then 1 of threads further reduces
@@ -127,5 +130,6 @@ Sequential max: 999.999711
 Time taken: 0.017945 seconds
 \end{verbatim}
 Although this version is correct, it's slower than doing it sequentially.
+Apparently, a higher degree of parallelism is required to be worth the overhead.
 
 \end{document}
