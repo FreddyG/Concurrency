@@ -76,7 +76,7 @@ __global__ void reduceKernel(double *array, int N, double *out)
 }
 
 // return the mimum value of a given array
-double reduce_min(double *array, int N)
+double reduce_max(double *array, int N)
 {
     // allocate the array and result pointer on the GPU
     double* dev_array = NULL;

@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     }
 
     timer_start();
-    double max = reduce_min(array, ARRAY_SIZE);
+    double max = reduce_max(array, ARRAY_SIZE);
     double time_taken = timer_end();
     printf("Parallel max: %f\n", max);
     printf("Time taken: %f seconds\n", time_taken);
