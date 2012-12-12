@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "reduce.h"
+#include "timer.h"
 
 #define ARRAY_SIZE 10000000
 
@@ -37,10 +38,14 @@ int main(int argc, char *argv[])
         array[i] = fRand(1, 1000);
     }
 
+    timer_start();
     double max = reduce_min(array, ARRAY_SIZE);
+    double time_taken = timer_end();
     printf("Parallel max: %f\n", max);
+    printf("Time taken: %f seconds\n", time_taken);
 
-    // find the min sequentially to validate the answer
+    // find the max sequentially to validate the answer
+    timer_start();
     double smax = array[0];
     for (int i = 1; i < ARRAY_SIZE; ++i)
     {
@@ -49,7 +54,9 @@ int main(int argc, char *argv[])
         }
     }
 
+    time_taken = timer_end();
     printf("Sequential max: %f\n", smax);
+    printf("Time taken: %f seconds\n", time_taken);
 
     return 0;
 }

@@ -1,11 +1,11 @@
 NVCC		= nvcc
 CC		= g++
 #CU_FLAGS	= -O3 -g -deviceemu
-CU_FLAGS	= -O3 -g --ptxas-options=-v -arch compute_20 -code sm_20
+CU_FLAGS	= -O3 -g -G --ptxas-options=-v -arch compute_20 -code sm_20
 CC_FLAGS	= -O3 -m64 -Wall
 
 CU_SOURCES	= reduce.cu
-CC_SOURCES	= main.cc
+CC_SOURCES	= main.cc timer.cc
 
 CU_OBJECTS	= $(CU_SOURCES:%.cu=%.o)
 CU_PTX		= $(CU_SOURCES:%.cu=%.ptx)
