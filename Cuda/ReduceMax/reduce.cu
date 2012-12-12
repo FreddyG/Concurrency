@@ -34,23 +34,6 @@ static void checkCudaCall(cudaError_t result) {
     }
 }
 
-// Returns the next power of 2 that is >= n
-__device__ int nextPowOfTwo(int n) {
-    // 0 is also a power of 2
-    if (n == 0) {
-        return n;
-    }
-
-    else {
-        int pow = 1;
-        while ( pow < n ) {
-            n *= 2;
-        }
-
-        return pow;
-    }
-}
-
 // Finds the minimum value in an array
 __global__ void reduceKernel(double *array, int N, double *out)
 {
@@ -63,6 +46,11 @@ __global__ void reduceKernel(double *array, int N, double *out)
 
     int start = threadIdx.x * stepsize,
         end   = start + stepsize;
+
+    // make sure the entire array gets checked
+    if (threadIdx.x == THREADS_PER_BLOCK - 1) {
+        end = N;
+    }
 
     double min = array[start];
     for (int i = start + 1; i < end; ++i) {
