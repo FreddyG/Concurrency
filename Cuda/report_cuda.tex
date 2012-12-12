@@ -70,6 +70,8 @@ kernel, leading to one kernel invocation per time step.
         10000000 & 500     & 1.9001 \\
         \hline
     \end{tabular}
+    \caption{The CUDA implementation at various parameter values.}
+    \label{table:cuda}
 \end{table}
 
 Table \ref{table:results} shows the results of the old experiments using
@@ -79,6 +81,51 @@ run 10 times and averaged to account for relatively large fluctuations in
 runtime.
 
 The results are quite clear; compared to the previous implementations, CUDA is
-fast as shit.
+really really fast.
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{l|l|l}
+        \hline
+        threads per block & time taken (s) \\
+        \hline
+        8    & 15.0367 \\
+        16   & 9.2053 \\
+        32   & 5.15237 \\
+        64   & 3.27603 \\
+        128  & 2.457 \\
+        256  & 2.28942 \\
+        512  & 2.03195 \\
+        1024 & 1.65433 \\
+        \hline
+    \end{tabular}
+    \caption{10000000 wave points over 500 iterations, using various numbers of
+    threads per block.}
+    \label{table:threads}
+\end{table}
+
+Table \ref{table:threads} shows the effect of the number of threads per block,
+from 8 up to the maximum of 1024. $i\_max$ and $t\_max$ are kept constant at
+10000000 and 500, respectively. These results do not take fluctuations into
+account. There is definitely a constant increase in speed with higher numbers of
+threads, but there are clear diminishing returns. Because the number of blocks
+in 1 dimension is limited to 65535, a low number of threads will equal a larger
+chunk of the wave to be handled per thread, and thus less parallelism.
+
+\section{Reduction}
+The first version of the reduction algorithm uses a simple architecture with 1
+block and 512 threads per block. Each thread reduces a chunk of the input array,
+reducing the array to one of 512 elements. Then 1 of threads further reduces
+that array to a single value.
+Sample output is as follows, using a randomly filled array of 10 million
+doubles:
+\begin{verbatim}
+Parallel max: 999.999711
+Time taken: 0.397627 seconds
+
+Sequential max: 999.999711
+Time taken: 0.017945 seconds
+\end{verbatim}
+Although this version is correct, it's slower than doing it sequentially.
 
 \end{document}
