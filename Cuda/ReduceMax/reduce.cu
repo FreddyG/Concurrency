@@ -48,7 +48,7 @@ __global__ void reduceKernel(double *array, int N, double *out)
         end   = start + stepsize;
 
     // make sure the entire array gets checked
-    if (threadIdx.x == ()THREADS_PER_BLOCK - 1) {
+    if (threadIdx.x == THREADS_PER_BLOCK - 1) {
         end = N;
     }
 
@@ -59,7 +59,7 @@ __global__ void reduceKernel(double *array, int N, double *out)
         }
     }
 
-    min_per_thread[threadIdx.x] = min;
+    max_per_thread[threadIdx.x] = min;
     __syncthreads();
 
     // one of the threads performs a further reduction step
