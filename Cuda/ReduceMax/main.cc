@@ -37,19 +37,19 @@ int main(int argc, char *argv[])
         array[i] = fRand(1, 1000);
     }
 
-    double min = reduce_min(array, ARRAY_SIZE);
-    printf("Parallel min: %f\n", min);
+    double max = reduce_min(array, ARRAY_SIZE);
+    printf("Parallel max: %f\n", max);
 
     // find the min sequentially to validate the answer
-    double smin = array[0];
+    double smax = array[0];
     for (int i = 1; i < ARRAY_SIZE; ++i)
     {
-        if (array[i] < smin) {
-            smin = array[i];
+        if (array[i] > smax) {
+            smax = array[i];
         }
     }
 
-    printf("Sequential min: %f\n", smin);
+    printf("Sequential max: %f\n", smax);
 
     return 0;
 }
