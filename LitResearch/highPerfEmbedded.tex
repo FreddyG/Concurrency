@@ -11,27 +11,83 @@
 \begin{document}
 \maketitle
 
+\begin{abstract}
+    Embedded, generally ARM-based, systems are rapidly gaining in performance,
+    mainly thanks to the increased heterogeneity and parallelism imposed by the
+    observed limit in clock speed. The main challenge remains in making these
+    systems programmable in an effective and accessible way. In the future, the
+    distinction between embedded ARM systems and traditional x86 desktop and
+    server systems will blur.
+\end{abstract}
+
 \section{Introduction}
 Traditionally, high-performance and embedded computing have been entirely
-seperate entities; back in the 1990s, phones could do little more than make
+separate entities; back in the 1990s, phones could do little more than make
 calls or send text messages, and nobody would consider running large data
 analysis on their microwave. Recent advancements in the fields of multi-core
 computing and general purpose GPU processing have started to blur this
-distinction however. Phones and tablets these days often feature quadcore
-processors and formidable GPUs, generally in a single SoC (System on a Chip)
-such as the NVidia Tegra. High-end tablets can play beautiful looking games with
-resolutions higher than most computer monitors can even handle, while phones are
-able to offer a smoother web browsing experience than low-end laptops can.
-
-This paper will shortly go over the benefits and challenges posed by this
-convergence.
+distinction however. Phones and tablets these days often feature powerful
+quadcore processors and formidable GPUs, generally in a single SoC (System on a
+Chip). This paper will shortly go over the cause, the challenges posed by these
+developments, and predictions for the future.
 
 \section{Heterogeneous Computing}
 Heterogeneous computing, as emphasized by \cite{conf/iccd/KaeliA11} and
-\cite{crowley2006impact}, refers to a device using different processing units
-with different ISAs.
+\cite{crowley2006impact}, refers to a device using different processing units,
+most often CPU, along with a GPU and maybe some specific coprocessors, in a
+single platform with high memory bandwidth between each unit. The main factor in
+the recent push for homogeneous systems the limit encountered in CPU clock
+speed\cite{conf/iccd/KaeliA11}; ever since we arrived at kind of a practical
+upper limit for clock speed, manufacturers have been resorting to different ways
+of increasing computational performance. It started out with an increasing
+number of processor cores per chip, and recently general purpose GPUs have
+become a hot topic.  
 
-\bibliographystyle{unsrt}
+These paradigms have been especially embraced by embedded systems, because it
+allows for high performance with multiple processor cores at relatively low
+clock speeds, leading to a far lower power consumption than would be required
+for beefed up Pentium 4-era processors with clockspeeds nearing 4ghz.  In the
+desktop world, Intel and AMD have both started moving towards further
+integration between CPU and GPU with their /emph{Intel Larrabee} and {AMD
+Fusion} platforms, while it has been standard in ARM-based consumer electronics
+for quite some time (\emph{Nvidia Tegra}, \emph{Qualcomm Snapdragon}, et
+cetera).
+
+\section{Challenges}
+Although non-CPU devices allow for immense increases in speed in some areas, it
+comes at the cost of non-familiarity. For example, programming a GPU
+efficiently requires an entirely different approach than programming a CPU at
+every layer of abstraction. Especially due to the closed nature of GPU hardware,
+programming libraries are limited to the ones specifically supported by the
+hardware manufacturers; most notably the open standard
+OpenCL\cite{stone2010opencl} and Nvidia's proprietary
+CUDA\cite{nvidia2008programming}. Both of these  are extensions of the C
+language, although bindings are available for other popular languages such as
+Python.
+
+\section{The Future}
+Assuming the world doesn't end in 2 days, I predict we will see a further
+convergence between embedded systems and traditional desktops. The success of
+ARM-based consumer electronics will lead to further development of the ARM
+platform, which will eventually become an attractive target for servers due to
+ARM's low power consumption compared to x86-based architectures. Adding to this
+the fact that Microsoft recently started supporting ARM with their Windows 8
+release (and many Linux distributions supporting ARM for many years now), we
+might be facing a future where there is little distinction between ARM and x86
+platforms, both in terms of performance and the software ecosystems.
+
+\section{Conclusion}
+Embedded systems are rapidly approaching traditional desktop computers in terms of
+computing power, and both embedded and non-embedded systems are increasing their
+heterogeneity. Programming homogeneous systems in an effective and accessible
+way is still a challenge, but it seems almost inevitable that the distinctions
+between desktop and mobile, and between ARM and x86, will continue fading until
+we end with a melting pot of computing architectures. Hopefully, by then there
+will be a standard, platform-independent way of programming these, regardless of
+the specific homogeneity of the target platform.
+
+
+\bibliographystyle{plain}
 \bibliography{library}
 
 \end{document}
